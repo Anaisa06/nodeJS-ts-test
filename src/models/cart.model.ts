@@ -14,9 +14,6 @@ export class Cart extends Model {
     })
     id!: number;
 
-    // @HasMany(() => Product)
-    // products!: Product[];
-
     @ForeignKey(()  => User)
     @Column({
         type: DataType.INTEGER

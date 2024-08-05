@@ -1,14 +1,22 @@
 import { inject, injectable } from "tsyringe";
-import { UserRepository } from "../repositores";
+import { CartRepository, UserRepository } from "../repositores";
 import { User } from "../models";
 import { Order } from "sequelize";
 
 @injectable()
 export class UserService {
-  constructor(@inject(UserRepository) private userRepository: UserRepository) {}
+  constructor(
+    @inject(UserRepository) private userRepository: UserRepository,
+    @inject(CartRepository) private cartRepository: CartRepository
+  ) {}
 
   async createUser(user: Partial<User>): Promise<User> {
-    return await this.userRepository.create(user);
+    const newUser = await this.userRepository.create(user);
+
+    await this.cartRepository.create({ userId: newUser.id });
+
+    return newUser
+
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -24,8 +32,8 @@ export class UserService {
   }
 
   async updateUser(id: number, user: Partial<User>): Promise<number>{
-    const [ affectedRows ] = await this.userRepository.update(id, user);
-    return affectedRows;
+    const [ affectedCount ] = await this.userRepository.update(id, user);
+    return affectedCount;
   }
 
   async deleteUser(id: number): Promise<number> {
