@@ -11,8 +11,8 @@ export class ProductRepository {
     return await Product.findOne();
   }
 
-  async getById() {
-    return await Product.findByPk();
+  async getById(id: number) {
+    return await Product.findByPk(id);
   }
 
   async create(product: Partial<Product>) {
