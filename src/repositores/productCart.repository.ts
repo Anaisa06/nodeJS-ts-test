@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { ProductCart } from "../models";
+import { Product, ProductCart, User } from "../models";
 
 @injectable()
 export class ProductCartRepository {
@@ -8,7 +8,7 @@ export class ProductCartRepository {
   }
 
   async getByCart(cartId: number) {
-    return await ProductCart.findAll({ where: { cartId }});
+    return await ProductCart.findAll({ where: { cartId }, include: Product});
   }
 
   async getById(id: number) {

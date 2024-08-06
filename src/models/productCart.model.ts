@@ -1,4 +1,4 @@
-import { AutoIncrement, BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, HasOne, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { Cart } from "./cart.model";
 import { Product } from "./product.model";
 
@@ -21,12 +21,18 @@ export class ProductCart extends Model {
     })
     productId!: number;
 
+    @BelongsTo(() => Product)
+    product!: Product
+
     @ForeignKey(() => Cart)
     @Column({
         type: DataType.INTEGER,
         allowNull: false
     })
     cartId!: number;
+
+    @BelongsTo(() => Cart)
+    cart!: Cart;
  
     @Column({
         type: DataType.INTEGER,

@@ -1,6 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { OrderRepository, ProductCartRepository } from "../repositores";
 import { Order } from "../models";
+import { CustomError } from "../helpers/error.helper";
 
 
 @injectable()
@@ -14,18 +15,44 @@ export class OrderService {
         return await this.orderRepository.getByUser(id);
     }
 
-    async getOrders(): Promise<Order[]>{
+    async getAllOrders(): Promise<Order[]>{
         return await this.orderRepository.getAll();
     }
 
-    // async createOrder(cartId: number, order: Partial<Order>, quantity: number, ): Promise<Order>{
+    private async getTotalPrice(cartId: number){
+        const productCart = await this.productCartRepository.getByCart(cartId);
 
-    //     const newOrder = await this.orderRepository.create(order);
-    //     const newProductCart = await this.productCartRepository.create({p})
-    // }
+        let accum: number = 0;      
+
+       productCart.forEach(cart => {
+             accum += (cart.quantity * cart.product.price)      
+        })
+
+        console.log(accum)
+        return accum;
+    }
+
+    async createOrder(order: Partial<Order>): Promise<any>{
+
+        if(!order.cartId) throw new CustomError(400, 'cart id is required');
+
+        const total: number = await this.getTotalPrice(order.cartId);
+
+        order.total = total
+
+        const newOrder = await this.orderRepository.create(order);
+
+        //deelte cartsproduct
+
+        return newOrder;
+    }
 
     async updateOrder(id: number, order: Partial<Order>): Promise<number> {
         const [ affectedCount ] = await this.orderRepository.update(id, order);
         return affectedCount;
+    }
+
+    async deleteOrder(id: number): Promise<number> {
+        return this.orderRepository.delete(id);
     }
 }
