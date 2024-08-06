@@ -7,12 +7,12 @@ export class ProductCartRepository {
     return await ProductCart.findAll();
   }
 
-  async getOne() {
-    return await ProductCart.findOne();
+  async getByCart(cartId: number) {
+    return await ProductCart.findAll({ where: { cartId }});
   }
 
-  async getById() {
-    return await ProductCart.findByPk();
+  async getById(id: number) {
+    return await ProductCart.findByPk(id);
   }
 
   async create(productCart: Partial<ProductCart>) {
@@ -23,7 +23,7 @@ export class ProductCartRepository {
     return await ProductCart.update(productCart, { where: { id } });
   }
 
-  async delete(id: number) {
-    return await ProductCart.destroy({ where: { id } });
+  async deleteByProduct(productId: number) {
+    return await ProductCart.destroy({ where: { productId } });
   }
 }

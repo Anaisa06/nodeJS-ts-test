@@ -7,12 +7,12 @@ export class CartRepository {
     return await Cart.findAll();
   }
 
-  async getOne() {
-    return await Cart.findOne();
+  async getByUser(userId: number) {
+    return await Cart.findOne({ where: { userId }});
   }
 
-  async getById() {
-    return await Cart.findByPk();
+  async getById(id: number) {
+    return await Cart.findByPk(id);
   }
 
   async create(cart: Partial<Cart>) {
