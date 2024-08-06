@@ -1,6 +1,6 @@
 import { AutoIncrement, BelongsTo, Column, DataType, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { User } from "./user.model";
-import { ProductCart } from "./productCart.model";
+import { Cart } from "./cart.model";
 
 @Table({
     tableName: 'orders',
@@ -29,12 +29,12 @@ export class Order extends Model {
     @BelongsTo(() => User)
     user!: User
 
-    @ForeignKey(() => ProductCart)
+    @ForeignKey(() => Cart)
     @Column({
         type: DataType.INTEGER
     })
-    productCartId!: number;
+    cartId!: number;
 
-    @BelongsTo(() => ProductCart)
-    productCart!: ProductCart
+    @BelongsTo(() => Cart)
+    cart!: Cart
 }
