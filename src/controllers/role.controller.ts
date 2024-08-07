@@ -1,6 +1,6 @@
 import { container } from "tsyringe";
 import { RoleService } from "../services/role.service";
-import { CustomError } from "../helpers/error.helper";
+import { BadRequestError, NotFoundError } from "../interfaces/error.classes";
 import { NextFunction, Request, Response } from "express";
 
 export class RoleController {
@@ -11,7 +11,7 @@ export class RoleController {
 
             const roles = await roleService.getAllRoles();
 
-            if (!roles.length) throw new CustomError(404, "No roles were found");
+            if (!roles.length) throw new NotFoundError("No roles were found");
 
             res.status(200).json({ message: 'Roles fetched succesfully', data: roles });
         } catch (error: any) {
@@ -26,7 +26,7 @@ export class RoleController {
 
             const { name } = req.body;
 
-            if(!name) throw new CustomError(400, 'Name is required');
+            if(!name) throw new BadRequestError('Name is required');
 
             const newRole = await roleService.createRole(req.body);
 

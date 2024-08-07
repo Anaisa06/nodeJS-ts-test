@@ -8,7 +8,7 @@ export class CartRepository {
   }
 
   async getByUser(userId: number) {
-    return await Cart.findOne({ where: { userId }});
+    return await Cart.findAll({ where: { userId }});
   }
 
   async getById(id: number) {

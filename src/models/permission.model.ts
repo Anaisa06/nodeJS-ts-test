@@ -48,5 +48,5 @@ export class Permission extends Model {
         type: DataType.BOOLEAN,
         allowNull: false
     })
-    canGet!: boolean;
+    canRead!: boolean;
 }

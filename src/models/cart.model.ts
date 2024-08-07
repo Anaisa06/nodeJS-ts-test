@@ -1,4 +1,4 @@
-import { AutoIncrement, BelongsTo, Column, DataType, ForeignKey, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { User } from "./user.model";
 import { Order } from "./order.model";
 
@@ -23,6 +23,6 @@ export class Cart extends Model {
     @BelongsTo(() => User)
     user!: User;
 
-    @HasMany(() => Order)
-    orders!: Order[];
+    @HasOne(() => Order)
+    order!: Order;
 }

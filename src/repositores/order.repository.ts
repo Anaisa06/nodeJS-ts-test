@@ -15,8 +15,8 @@ export class OrderRepository {
     return await Order.findOne();
   }
 
-  async getById() {
-    return await Order.findByPk();
+  async getById(id: number) {
+    return await Order.findByPk(id);
   }
 
   async create(order: Partial<Order>) {

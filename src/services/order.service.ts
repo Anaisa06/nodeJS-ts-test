@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { CartRepository, OrderRepository, ProductCartRepository } from "../repositores";
-import { Cart, Order } from "../models";
-import { CustomError } from "../helpers/error.helper";
+import { Cart, Order, Product, ProductCart } from "../models";
+import { BadRequestError, NotFoundError } from "../interfaces/error.classes";
 
 
 @injectable()
@@ -13,11 +13,33 @@ export class OrderService {
     ) { }
 
     async getOrdersbyUser(id: number): Promise<Order[]> {
-        return await this.orderRepository.getByUser(id);
+        const orders: Order[] = await this.orderRepository.getByUser(id);
+
+        if(!orders.length) throw new NotFoundError (`No orders were found for user with id ${id}`);
+
+        return orders;
     }
 
     async getAllOrders(): Promise<Order[]> {
         return await this.orderRepository.getAll();
+    }
+
+    async getOrderById(id: number): Promise<Order> {
+        const order: Order | null = await this.orderRepository.getById(id);
+        if(!order) throw new NotFoundError(`Order with id ${id} not found`);
+        return order;
+    }
+
+    async getProductsByOrderId(id: number): Promise<Product[]> {
+        const order: Order = await this.getOrderById(id);
+
+        const productCarts: ProductCart[] = await this.productCartRepository.getByCart(order.cartId);
+
+        const products: Product[] = productCarts.map((cart) => {
+            return cart.product;
+        })
+
+        return products;
     }
 
     private async getTotalPrice(cartId: number) {
@@ -33,15 +55,17 @@ export class OrderService {
         return accum;
     }
 
-    async createOrder(userId: number): Promise<any> {
+    async createOrder(userId: number, cartId: number): Promise<any> {
 
-        const cart: Cart | null = await this.cartRepository.getByUser(userId);
+        const cart: Cart | null = await this.cartRepository.getById(cartId);
 
-        if (!cart) throw new CustomError(400, 'cart was not found');
+        if (!cart) throw new BadRequestError('cart was not found');
 
         const total: number = await this.getTotalPrice(cart.id);
 
-        if(!total) throw new CustomError(400, 'There are no products in the cart');
+        console.log(total);
+
+        if(!total) throw new NotFoundError('There are no products in the cart');
 
         const order: Partial<Order> = {
             total,
@@ -50,8 +74,6 @@ export class OrderService {
         }
 
         const newOrder = await this.orderRepository.create(order);
-
-        //deelte cartsproduct
 
         return newOrder;
     }

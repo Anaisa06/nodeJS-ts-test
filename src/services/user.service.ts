@@ -1,9 +1,11 @@
 import { inject, injectable } from "tsyringe";
 import jwt from "jsonwebtoken";
 import { CartRepository, PermissionRepository, UserRepository } from "../repositores";
-import { User } from "../models";
+import { Permission, User } from "../models";
 import dotenv from 'dotenv';
-import { CustomError } from "../helpers/error.helper";
+import { BadRequestError, NotFoundError } from "../interfaces/error.classes";
+import { ICreateUser, IUpdateUser, IUserWithPermission } from "../interfaces/user.interfaces";
+import { encryptHelper } from "../helpers/bcrypt.helper";
 
 dotenv.config();
 
@@ -11,46 +13,73 @@ dotenv.config();
 export class UserService {
   constructor(
     @inject(UserRepository) private userRepository: UserRepository,
-    @inject(CartRepository) private cartRepository: CartRepository,
     @inject(PermissionRepository) private permissionRepository: PermissionRepository
-  ) {}
+  ) { }
 
-  async createUser(user: Partial<User>): Promise<User> {
-    const newUser: User = await this.userRepository.create(user);
+  async createUser(user: ICreateUser): Promise<User> {
 
-    await this.cartRepository.create({ userId: newUser.id });
+    const hashedPassword: string = await encryptHelper(user.password);
+
+    const newUser: User = await this.userRepository.create({...user, password: hashedPassword});
 
     return newUser;
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await this.userRepository.getAll();
+    const users: User[] = await this.userRepository.getAll();
+
+    if (!users.length) throw new NotFoundError ("No users were found");
+
+    return users;
+
   }
 
-  async getUserById(id: number): Promise<User | null> {
-    return await this.userRepository.getById(id);
+  async getUserById(id: number): Promise<User> {
+    const user: User | null = await this.userRepository.getById(id);
+    if (!user) throw new NotFoundError('User not found');
+    return user;
   }
 
-  async getUserByEmail(email: string): Promise<User | null> {
-    return await this.userRepository.getOne(email);
+  async getUserByEmail(email: string): Promise<User> {
+    const user: User | null = await this.userRepository.getOne(email);
+    if (!user) throw new NotFoundError('User not found');
+    return user;
   }
 
-  async updateUser(id: number, user: Partial<User>): Promise<number>{
-    const [ affectedCount ] = await this.userRepository.update(id, user);
-    return affectedCount;
+  async updateUser(id: number, user: IUpdateUser): Promise<User> {
+
+    if(user.password) {
+      const hashedPassword = await encryptHelper(user.password);
+      user.password = hashedPassword;
+    }
+
+    const [affectedCount] = await this.userRepository.update(id, user);
+
+    if (!affectedCount) throw new NotFoundError('User not found');
+
+    const updatedUser: User = await this.getUserById(id);
+
+    return updatedUser;
   }
 
-  async deleteUser(id: number): Promise<number> {
-    return await this.userRepository.delete(id);
+  async deleteUser(id: number): Promise<User> {
+
+    const user: User | null = await this.getUserById(id);
+
+    if(!user) throw new NotFoundError ('User not found');
+    
+    await this.userRepository.delete(id);
+
+    return user;
   }
 
-  async generateToken (user: Partial<User>): Promise<string> {
+  async generateToken(user: Partial<User>): Promise<string> {
 
-    if(!user.role) throw new CustomError(400, 'User role is not defined');
+    if (!user.role) throw new BadRequestError('User role is not defined');
 
-    const userPermission = await this.permissionRepository.getByRole(user.role.id);
+    const userPermission: Permission[] = await this.permissionRepository.getByRole(user.role.id);
 
-    const userWithPermission = {
+    const userWithPermission: IUserWithPermission = {
       ...user,
       permission: userPermission
     }
@@ -60,5 +89,5 @@ export class UserService {
     const token: string = jwt.sign(userWithPermission, secret, { expiresIn: "12h" });
 
     return token;
-};
+  };
 }

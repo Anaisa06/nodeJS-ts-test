@@ -48,8 +48,8 @@ export class User extends Model {
   @BelongsTo(() => Role)
   role!: Role;
 
-  @HasOne(() => Cart)
-  cart!: Cart;
+  @HasMany(() => Cart)
+  carts!: Cart[];
 
   @HasMany(() => Order)
   orders!: Order;

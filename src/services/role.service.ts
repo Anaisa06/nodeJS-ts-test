@@ -1,6 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { RoleRepository } from "../repositores";
 import { Role } from "../models";
+import { NotFoundError } from "../interfaces/error.classes";
 
 @injectable()
 export class RoleService {
@@ -14,7 +15,11 @@ export class RoleService {
         return await this.roleRepository.create(role);
     }
 
-    async getOne(name: string): Promise<Role|null> {
-        return await this.roleRepository.getOne(name);
+    async getOne(name: string): Promise<Role> {
+        const role: Role | null = await this.roleRepository.getOne(name);
+
+        if (!role) throw new NotFoundError (`Role '${name}' not found`);
+        
+        return role;
     }
 }

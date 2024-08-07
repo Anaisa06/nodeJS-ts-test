@@ -2,15 +2,14 @@ import { NextFunction, Request, Response } from "express";
 import { ProductService } from "../services/product.service";
 import { container } from "tsyringe";
 import { Product } from "../models";
-import { CustomError } from "../helpers/error.helper";
+import { NotFoundError, BadRequestError } from "../interfaces/error.classes";
 
 export class ProductController {
     static async getAllProducts( _: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const productService: ProductService = container.resolve(ProductService);
-      const products: Product[] = await productService.getAllProducts();
 
-      if (!products.length) throw new CustomError(404, "No products were found");
+      const products: Product[] = await productService.getAllProducts();
 
       res
         .status(200)
@@ -26,7 +25,7 @@ export class ProductController {
 
             const { name, price, stock } = req.body;
 
-            if(!name || !price || !stock) throw new CustomError(400, 'Name, price and stock are required');
+            if(!name || !price || !stock) throw new BadRequestError('Name, price and stock are required');
 
             const newProduct = await productService.createProduct(req.body);
 
@@ -41,14 +40,9 @@ export class ProductController {
       const { id } = req.params;
       const newValues = req.body;
 
-      const productService: ProductService = container.resolve(ProductService);
+      const productService: ProductService = container.resolve(ProductService); 
 
-      const product = await productService.getProductById(+id)
-      if(!product) throw new CustomError (404, 'Product not found');   
-
-      await productService.updateProduct(+id, newValues)
-
-      const productUpdated = await productService.getProductById(+id)
+      const productUpdated: Product | null = await productService.updateProduct(+id, newValues)
 
       res.status(200).json({ message: 'Product updated succesfully', data: productUpdated }) 
       
@@ -63,16 +57,11 @@ export class ProductController {
 
       const { id } = req.params
 
-      const product = await productService.getProductById(+id)
-      if(!product) throw new CustomError (404, 'product not found');
+      const deletedProduct: Product = await productService.deleteProduct(+id)
 
-      await productService.deleteProduct(+id)
-
-      res.status(200).json({ message: 'Product deleted succesfully', data: product })
+      res.status(200).json({ message: 'Product deleted succesfully', data: deletedProduct })
     } catch (error: any) {
       next(error);
     }
   }
-
-
 }

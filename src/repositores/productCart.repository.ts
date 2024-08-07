@@ -23,7 +23,7 @@ export class ProductCartRepository {
     return await ProductCart.update(productCart, { where: { id } });
   }
 
-  async deleteByProduct(productId: number) {
-    return await ProductCart.destroy({ where: { productId } });
+  async delete(id: number) {
+    return await ProductCart.destroy({ where: { id } });
   }
 }

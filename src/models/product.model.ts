@@ -36,7 +36,4 @@ export class Product extends Model {
         allowNull: false
     })
     stock!: number
-
-    // @BelongsToMany(Cart, { through: ProductCart})
-    // carts!: Cart[]
 }
