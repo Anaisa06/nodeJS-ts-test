@@ -23,7 +23,7 @@ npm install
 This will create the tables in the database automatically
 
 ```bash
-npm install
+npm start
 ```
 
 ### Step 4: Add default values to the database
