@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
-import { OrderRepository, ProductCartRepository } from "../repositores";
-import { Order } from "../models";
+import { CartRepository, OrderRepository, ProductCartRepository } from "../repositores";
+import { Cart, Order } from "../models";
 import { CustomError } from "../helpers/error.helper";
 
 
@@ -8,7 +8,8 @@ import { CustomError } from "../helpers/error.helper";
 export class OrderService {
     constructor(
         @inject(OrderRepository) private orderRepository: OrderRepository,
-        @inject(ProductCartRepository) private productCartRepository: ProductCartRepository
+        @inject(ProductCartRepository) private productCartRepository: ProductCartRepository,
+        @inject(CartRepository) private cartRepository: CartRepository
     ) { }
 
     async getOrdersbyUser(id: number): Promise<Order[]> {
@@ -32,13 +33,21 @@ export class OrderService {
         return accum;
     }
 
-    async createOrder(order: Partial<Order>): Promise<any> {
+    async createOrder(userId: number): Promise<any> {
 
-        if (!order.cartId) throw new CustomError(400, 'cart id is required');
+        const cart: Cart | null = await this.cartRepository.getByUser(userId);
 
-        const total: number = await this.getTotalPrice(order.cartId);
+        if (!cart) throw new CustomError(400, 'cart was not found');
 
-        order.total = total
+        const total: number = await this.getTotalPrice(cart.id);
+
+        if(!total) throw new CustomError(400, 'There are no products in the cart');
+
+        const order: Partial<Order> = {
+            total,
+            userId,
+            cartId: cart.id
+        }
 
         const newOrder = await this.orderRepository.create(order);
 

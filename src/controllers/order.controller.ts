@@ -8,13 +8,11 @@ import { AuthRequest } from "../middlewares/jwtAuth.middleware";
 export class OrderController {
     static async createOrder(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { userId, cartId} = req.body;
-
-            if(!userId || !cartId) throw new CustomError(400, 'user Id and cart Id are required');
+            const { id } = req.user;
 
             const orderService: OrderService = container.resolve(OrderService);
 
-            const newOrder: Order = await orderService.createOrder({ userId, cartId });
+            const newOrder: Order = await orderService.createOrder(id);
 
             res.status(201).json({ message: 'Order created', data: newOrder });
 

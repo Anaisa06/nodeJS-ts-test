@@ -6,6 +6,7 @@ import { encryptHelper } from "../helpers/bcrypt.helper";
 import { RoleService } from "../services/role.service";
 import { Order, Role, User } from "../models";
 import { OrderService } from "../services/order.service";
+import { AuthRequest } from "../middlewares/jwtAuth.middleware";
 
 export class UserController {
   static async getAllUsers( _: Request, res: Response, next: NextFunction): Promise<void> {
@@ -23,7 +24,7 @@ export class UserController {
     }
   }
 
-  static async getUserById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  static async getUserById(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userService: UserService = container.resolve(UserService);
 
@@ -97,7 +98,7 @@ export class UserController {
     }
   }
 
-  static async updateUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+  static async updateUser(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       const newValues = req.body;
