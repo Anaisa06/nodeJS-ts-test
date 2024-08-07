@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { User } from "../models";
+import { Role, User } from "../models";
 
 @injectable()
 export class UserRepository {
@@ -8,7 +8,7 @@ export class UserRepository {
   }
 
   async getOne(email: string) {
-    return await User.findOne({ where: { email }, attributes: { exclude: ['password']} });
+    return await User.findOne({ where: { email }, include: Role });
   }
 
   async getById(id: number) {

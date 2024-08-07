@@ -3,8 +3,8 @@ import { Permission } from "../models";
 
 @injectable()
 export class PermissionRepository {
-  async getAll() {
-    return await Permission.findAll();
+  async getByRole(roleId: number) {
+    return await Permission.findAll({ where: { roleId }});
   }
 
   async getOne() {

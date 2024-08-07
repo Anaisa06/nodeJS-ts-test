@@ -1,22 +1,26 @@
 import { inject, injectable } from "tsyringe";
-import { CartRepository, UserRepository } from "../repositores";
+import jwt from "jsonwebtoken";
+import { CartRepository, PermissionRepository, UserRepository } from "../repositores";
 import { User } from "../models";
-import { Order } from "sequelize";
+import dotenv from 'dotenv';
+import { CustomError } from "../helpers/error.helper";
+
+dotenv.config();
 
 @injectable()
 export class UserService {
   constructor(
     @inject(UserRepository) private userRepository: UserRepository,
-    @inject(CartRepository) private cartRepository: CartRepository
+    @inject(CartRepository) private cartRepository: CartRepository,
+    @inject(PermissionRepository) private permissionRepository: PermissionRepository
   ) {}
 
   async createUser(user: Partial<User>): Promise<User> {
-    const newUser = await this.userRepository.create(user);
+    const newUser: User = await this.userRepository.create(user);
 
     await this.cartRepository.create({ userId: newUser.id });
 
-    return newUser
-
+    return newUser;
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -39,4 +43,22 @@ export class UserService {
   async deleteUser(id: number): Promise<number> {
     return await this.userRepository.delete(id);
   }
+
+  async generateToken (user: Partial<User>): Promise<string> {
+
+    if(!user.role) throw new CustomError(400, 'User role is not defined');
+
+    const userPermission = await this.permissionRepository.getByRole(user.role.id);
+
+    const userWithPermission = {
+      ...user,
+      permission: userPermission
+    }
+
+    const secret: string = process.env.JWT_SECRET as string;
+
+    const token: string = jwt.sign(userWithPermission, secret, { expiresIn: "12h" });
+
+    return token;
+};
 }

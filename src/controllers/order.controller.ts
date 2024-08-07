@@ -3,9 +3,10 @@ import { container } from "tsyringe";
 import { OrderService } from "../services";
 import { CustomError } from "../helpers/error.helper";
 import { Order } from "../models";
+import { AuthRequest } from "../middlewares/jwtAuth.middleware";
 
 export class OrderController {
-    static async createOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+    static async createOrder(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
             const { userId, cartId} = req.body;
 
@@ -22,7 +23,7 @@ export class OrderController {
         }
     }
 
-    static async getAllOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
+    static async getAllOrders(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
             const orderService: OrderService = container.resolve(OrderService);
             const orders: Order[] = await orderService.getAllOrders();

@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { OrderController } from "../controllers/order.controller";
+import { authorization, jwtAuth } from "../middlewares/jwtAuth.middleware";
 
 export const orderRouter: Router = Router();
 
-orderRouter.post('/', OrderController.createOrder);
-orderRouter.get('/', OrderController.getAllOrders);
-orderRouter.delete('/:id', OrderController.deleteOrder);
+orderRouter.post('/', jwtAuth, authorization('canCreate', 1), OrderController.createOrder);
+orderRouter.get('/', jwtAuth, authorization('canRead', 1), OrderController.getAllOrders);
+orderRouter.delete('/:id', jwtAuth, authorization('canDelete', 1), OrderController.deleteOrder);

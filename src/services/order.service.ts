@@ -9,32 +9,32 @@ export class OrderService {
     constructor(
         @inject(OrderRepository) private orderRepository: OrderRepository,
         @inject(ProductCartRepository) private productCartRepository: ProductCartRepository
-    ){}
+    ) { }
 
-    async getOrdersbyUser(id: number): Promise<Order[]>{
+    async getOrdersbyUser(id: number): Promise<Order[]> {
         return await this.orderRepository.getByUser(id);
     }
 
-    async getAllOrders(): Promise<Order[]>{
+    async getAllOrders(): Promise<Order[]> {
         return await this.orderRepository.getAll();
     }
 
-    private async getTotalPrice(cartId: number){
+    private async getTotalPrice(cartId: number) {
         const productCart = await this.productCartRepository.getByCart(cartId);
 
-        let accum: number = 0;      
+        let accum: number = 0;
 
-       productCart.forEach(cart => {
-             accum += (cart.quantity * cart.product.price)      
+        productCart.forEach(cart => {
+            accum += (cart.quantity * cart.product.price)
         })
 
         console.log(accum)
         return accum;
     }
 
-    async createOrder(order: Partial<Order>): Promise<any>{
+    async createOrder(order: Partial<Order>): Promise<any> {
 
-        if(!order.cartId) throw new CustomError(400, 'cart id is required');
+        if (!order.cartId) throw new CustomError(400, 'cart id is required');
 
         const total: number = await this.getTotalPrice(order.cartId);
 
@@ -48,7 +48,7 @@ export class OrderService {
     }
 
     async updateOrder(id: number, order: Partial<Order>): Promise<number> {
-        const [ affectedCount ] = await this.orderRepository.update(id, order);
+        const [affectedCount] = await this.orderRepository.update(id, order);
         return affectedCount;
     }
 
