@@ -1,5 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.json';
 import sequelize  from './config/db'
 import router from './Routes/Router';
 import { errorHandler } from './middlewares/errorHandler.middleware';
@@ -12,6 +14,8 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 app.use('/api', router);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(errorHandler);
 
