@@ -41,6 +41,13 @@ INSERT INTO permissions (role_id, entity_id, can_create, can_update, can_delete,
 (2, 1, true, true, false, true),
 (2, 2, true, true, false, true);
 ```
+
+### Swagger
+
+You can use swagger documentation in this link: 
+http://localhost:3000/api-docs
+
+
 #### Now you can use the server. Remember to create a new user and login to be able to use every endpoint.
 
 ## Dependencies
